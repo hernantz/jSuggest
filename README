@@ -1,0 +1,13 @@
+ * jSuggest
+ * Version 1.0.0 - Updated: JAN. 01, 2012
+ *
+ * This Plug-In will set up a UI that suggest results for your search queries as you type. 
+ * You can add multiple selections as tokens and remove them on the fly. 
+ * It supports keybord navigation and multiple jSuggest fields on the same page.
+ *
+ * Built on top of the Autocomplete plugin by: Drew Wilson | www.drewwilson.com
+ * code.drewwilson.com/entry/autosuggest-jquery-plugin
+ *
+ * This jSuggest jQuery plug-in is dual licensed under the MIT and GPL licenses:
+ * http:// www.opensource.org/licenses/mit-license.php
+ * http:// www.gnu.org/licenses/gpl.html
