@@ -55,9 +55,9 @@
 		
 		// Get the data type of the source.
 		var dType = typeof opts.source;
-
+		
 		// Ensure that the source is either an object or a string.
-		if (dType === 'object' || dType === 'string'){
+		if (dType === 'object' || dType === 'string') {
 		  
 			return this.each(function(x) {
 			
@@ -93,6 +93,12 @@
 				// Get the selection limit value.
 				var sLimit = opts.selectionLimit;
 				
+				// Flag variable activated when the results are being loaded
+				var loadingFlag = false;
+				
+				// Variable that will be holding the remaining time to process the input between each keyup event.
+				var timeout = null;
+				
 				// If the preFill source is a string.
 				if (typeof opts.preFill === 'object') {
 
@@ -127,8 +133,6 @@
 				  input.focus();
 				}).after(resultsHolder);  
 
-				var timeout = null;
-				
 				// Handle input field events.
 				input.focus(function(){
 				  
@@ -157,7 +161,6 @@
 				  
 				}).keydown(function(e) { // The user is typing on the input.
 				  
-					
 					// Track last key pressed.
 					lastKey = e.keyCode;
 					
@@ -209,6 +212,7 @@
 
 						var nInput = input.val().replace(/(,)/g, '');
 						if (nInput !== '' && hiddenInput.val().search(nInput + ',') < 0 && nInput.length >= opts.minChars) { 
+							
 							// If the tab or return keys are pressed when an result item is active, add it.
 							if ((lastKey === 9 || lastKey === 13) && $('li.as-result-item:visible', resultsHolder).length > 0) { $('li.active:first', resultsUL).click(); }
 
@@ -216,29 +220,32 @@
 							else {
 								// If adding new items is allowed.
 								if (opts.newItem) {
+									
+									// Check that the results where loaded.
+									if(!loadingFlag) {
+										
+										// If we still are in within the number of items allowed.
+										if (sLimit && $('li', itemsHolder).length <= sLimit) {
 
-									// If we still are in within the number of items allowed.
-									if (sLimit && $('li', itemsHolder).length <= sLimit) {
+											// Get the custom formated object from the new item function.
+											var nData = opts.newItem.call(this, nInput);
 
-										// Get the custom formated object from the new item function.
-										var nData = opts.newItem.call(this, nInput);
+											// Generate a custom number identifier for the new item.
+											var lis = $('li', itemsHolder).length;
 
-										// Generate a custom number identifier for the new item.
-										var lis = $('li', itemsHolder).length;
+											// Add the new item.
+											addItem(nData, '00' + (lis+1));
 
-										// Add the new item.
-										addItem(nData, '00' + (lis+1));
+											// Hide the results list.
+											resultsHolder.hide();
 
-										// Hide the results list.
-										resultsHolder.hide();
+											// Reset the text input.
+											input.val('');
 
-										// Reset the text input.
-										input.val('');
-
+										}
+										// Show the message that alerts we cannot add more items.
+										else { resultsUL.html('<li class="as-message">'+opts.limitText+'</li>').show(); }
 									}
-									// Show the message that alerts we cannot add more items.
-									else { resultsUL.html('<li class="as-message">'+opts.limitText+'</li>').show(); }
-
 								}
 								// Show the newText message.
 								else{ resultsUL.html('<li class="as-message">'+opts.newText+'</li>').show(); }
@@ -282,45 +289,46 @@
 				// Function that is executed when typing and after the key delay timeout.
 				function keyChange() {
 				  
-				  // ignore if the following keys are pressed: [del] [shift] [capslock]
-				  if ( lastKey == 46 || (lastKey > 8 && lastKey < 32) ){ return resultsHolder.hide(); }
+					// ignore if the following keys are pressed: [del] [shift] [capslock]
+					if ( lastKey == 46 || (lastKey > 8 && lastKey < 32) ){ return resultsHolder.hide(); }
 
-				  // Get the text from the input.
-				  // Remove the slashes (\ /) and then the extra whitespaces.
-				  var string = $.trim(input.val()).replace(/[\\]+|[\/]+/g,"").replace(/\s+/g," ");
+					// Get the text from the input.
+					// Remove the slashes (\ /) and then the extra whitespaces.
+					var string = $.trim(input.val()).replace(/[\\]+|[\/]+/g,"").replace(/\s+/g," ");
 
-				  // If we passed the min chars limit, proceed.
-				  if (string.length >= opts.minChars) {
+					// If we passed the min chars limit, proceed.
+					if (string.length >= opts.minChars) {
 
-					// This counter is to get the number of values inside the source.
-					var dCount = 0;
+						// This counter is to get the number of values inside the source.
+						var dCount = 0;
 
-					// Call the custom beforeRetrieve function.
-					if (opts.beforeRetrieve){ string = opts.beforeRetrieve.call(this, string); }
+						// Call the custom beforeRetrieve function.
+						if (opts.beforeRetrieve){ string = opts.beforeRetrieve.call(this, string); }
 
-					// Show the loading text
-					itemsHolder.addClass('loading');
-					resultsUL.html('<li class="as-message">'+opts.loadingText+'</li>').show(); resultsHolder.show();
+						// Show the loading text, and start the loading state.
+						itemsHolder.addClass('loading');
+						loadingFlag = true;
+						resultsUL.html('<li class="as-message">'+opts.loadingText+'</li>').show(); resultsHolder.show();
 
-					// If the data is a URL, retrieve the results from it. Else, the data is an object, retrieve the results directly from the source.
-					if (dType === 'string') {
+						// If the data is a URL, retrieve the results from it. Else, the data is an object, retrieve the results directly from the source.
+						if (dType === 'string') {
 
-					  // Set up the limit of the query.
-					  var limit = qLimit ? "&limit="+encodeURIComponent(qLimit) : '';
+						  // Set up the limit of the query.
+						  var limit = qLimit ? "&limit="+encodeURIComponent(qLimit) : '';
 
-						// Build the query and retrieve the response in JSON format.
-						$.getJSON(opts.source+"?"+opts.queryParam+"="+encodeURIComponent(string)+limit+opts.extraParams, function(rData) { retrieveData(rData, string); });
+							// Build the query and retrieve the response in JSON format.
+							$.getJSON(opts.source+"?"+opts.queryParam+"="+encodeURIComponent(string)+limit+opts.extraParams, function(rData) { retrieveData(rData, string); });
+
+						}
+						else{ retrieveData(opts.source, string); }
 
 					}
-					else{ retrieveData(opts.source, string); }
 
-				  }
-
-				  // We don't have the min chars required.
-				  else {
-					itemsHolder.removeClass('loading');
-					resultsHolder.hide();
-				  }
+					// We don't have the min chars required.
+					else {
+						itemsHolder.removeClass('loading');
+						resultsHolder.hide();
+					}
 
 				}
 				
@@ -404,7 +412,9 @@
 				  
 					}
 		  
+					// There results where processed, remove the loading state
 					itemsHolder.removeClass('loading');
+					loadingFlag = false;
 
 					// If no results were found, show the empty text message.
 					if (matchCount <= 0){ resultsUL.html('<li class="as-message">'+opts.emptyText+'</li>'); }
