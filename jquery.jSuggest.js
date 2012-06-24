@@ -1,6 +1,6 @@
  /*
  * jSuggest
- * Version 1.0.1 - Updated: Jan. 12, 2012
+ * Version 1.0.2 - Updated: Jun. 24, 2012
  *
  * This Plug-In will set up a UI that suggest results for your search queries as you type. 
  * You can add multiple selections as tokens and remove them on the fly. 
@@ -40,7 +40,7 @@
 			resultsHighlight: true, // Option to choose whether or not to highlight the matched text in each result item.
 			selectionLimit: false, // Limits the number of selections that are allowed.
 			showResultList: true, // If set to false, the Results Dropdown List will never be shown at any time.
-			selectionClick: function(elem){}, // Custom function that is run when a previously chosen item is clicked.
+			selectionClick: function(elem, data){}, // Custom function that is run when a previously chosen item is clicked.
 			selectionAdded: function(elem, data){}, // Custom function that is run when an item is added to the items holder.
 			selectionRemoved: function(elem, data){ elem.remove(); }, // Custom function that is run when an item is removed from the items holder.
 			spotFirst: true, // Option that spots the first suggestions on the results list if true.
@@ -185,7 +185,7 @@
 								orgLI.prev().find('.as-close').click(); 
 							} else {
 								// Else, select the last item, and call the selectionClick custom function.
-								opts.selectionClick.call(this, orgLI.prev());
+								opts.selectionClick.call(this, orgLI.prev(), orgLI.prev().data('js-data'));
 								orgLI.prev().addClass('selected');    
 							}
 						}
@@ -425,11 +425,11 @@
 				// If a selected item is clicked, add the selected class and call the custom selectionClick function.
 				var item = $('<li class="as-selection-item" id="as-selection-'+num+'"></li>').click(function() {
 				
-					opts.selectionClick.call(this, $(this));
+					opts.selectionClick.call(this, $(this), data);
 					itemsHolder.children().removeClass('selected');
-					$(this).addClass('selected');
+					$(this).data(data).addClass('selected');
 				
-				});
+				}).data('js-data', data);
 
 				// If the close cross is clicked, 
 				var close = $('<a class="as-close">x</a>').click(function() {

@@ -1,5 +1,5 @@
  * jSuggest
- * Version 1.0.1 - Updated: JAN. 12, 2012
+ * Version 1.0.2 - Updated: JUN. 24, 2012
  *
  * This Plug-In will set up a UI that suggest results for your search queries as you type. 
  * You can add multiple selections as tokens and remove them on the fly. 
@@ -12,4 +12,4 @@
  * http:// www.opensource.org/licenses/mit-license.php
  * http:// www.gnu.org/licenses/gpl.html
  *
- * LIVE DEMO: http://jsbin.com/asahe5/51
+ * LIVE DEMO: http://jsbin.com/asahe5/71/
